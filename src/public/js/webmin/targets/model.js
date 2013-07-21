@@ -30,14 +30,15 @@ define([
     defaults: {
       url: '',
       orgId: '',
+      enabled: true,
       createDate: '',
       modifiedDate: '',
     },
     validate: function(attrs){
       var fields,
         errors = {},
-        i, len,
-        titleLen;
+        i, len
+        ;
 
       if(!attrs._silent){
         fields = [
@@ -53,8 +54,9 @@ define([
 
         // target url validation
         strLen = (attrs.url) ? attrs.url.length : null;
-        if(!strLen || strLen < 6 || strLen > 200){
-          errors.url = 'invalid url';
+        if(!strLen || strLen < 11 || strLen > 500){
+          errors.url = 'Target url must be between 11 and 500 \
+            characters in length';
         }
 
         if(_.keys(errors).length){

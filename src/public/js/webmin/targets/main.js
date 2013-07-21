@@ -2,29 +2,18 @@ define([
   'jquery',
   'underscore',
   'backbone',
-  'targets/collection',
   'targets/target'
-], function($, _, Backbone, TargetsCollection, TargetView){
+], function($, _, Backbone, TargetView){
 
   var view = Backbone.View.extend({
     id: 'targetlist',
     initialize: function(){
-      this.collection = new TargetsCollection();
-      this.on('data-loaded', function(){
-        this.renderTargets();
-      });
+      //this.collection = new TargetsCollection();
+      
     },
     render: function(){
       var self = this;
-
-      this.collection.fetch({
-        success: function(col, res, opts){
-          self.trigger('data-loaded');
-        },
-        error: function(col, res, opts){
-          debugger;
-        }
-      });
+      
       return this;
     },
     renderTargets: function(){

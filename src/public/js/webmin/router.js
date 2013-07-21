@@ -3,8 +3,11 @@ define([
 	'underscore',
 	'backbone',
 	'shared/HeaderView',
-	'targets/main'
-], function($, _, Backbone, HeaderView, TargetsView){
+	'targets/collection',
+	'targets/main',
+	'targets/details'
+], function($, _, Backbone, HeaderView, 
+	TargetsCollection, TargetsView, TargetView){
 	
 	var Router = Backbone.Router.extend({
 		routes: {
@@ -22,6 +25,8 @@ define([
 				header: $('#header')
 			};
 
+			//this.targetCollection = new TargetsCollection();
+
 			this.headerView = new HeaderView();
 			//this.alertsView = new AlertsView();
 			//this.urlsView = new UrlsView();
@@ -34,11 +39,38 @@ define([
 			$('#header').html(this.headerView.render().el);
 			this.headerView.select('alerts-menu');
 		},
-		showTargets: function(){
-			this.headerView.select('targets-menu');
+		showTargets: function(id){
+			var that = this;
+			var col = new TargetsCollection();
+			
+			col.on('data-loaded', function(){
+				// if no id was provided, load the target list
+				if(!id){
+					that.targetsView = new TargetsView({
+						collection: col
+					});
+					that.targetsView.renderTargets();
+					that.elms['content'].html(that.targetsView.render().el);
+				} else {
+					// if id was provided, show target details
+					var target = this.where({_id: id})
+						, target = target[0]
+						;
 
-			this.targetsView = new TargetsView();
-			this.elms['content'].html(this.targetsView.render().el);
+					that.view = new TargetView({
+						model: target
+					});
+
+					// listen for target validation failure
+					target.on('invalid', function(model, err){
+						that.view.displayErrorMsg(model, err);
+					});
+
+					that.elms['content'].html(that.view.render().el);
+				}
+			});
+
+			this.headerView.select('targets-menu');
 		},
 		showProbes: function(id){
 			//var that = this;

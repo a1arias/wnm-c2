@@ -1,0 +1,20 @@
+<h3>Edit Target Details</h3>
+<form action='/targets' method='post'>
+	<h4><%= _id %></h4>
+	<div id='urlCG' class='control-group'>
+		<label class='control-label' for='url'>Target Url</label>
+		<div class='controls'>
+			<input id='url' class='targetUrl' name='url' type='text' value='<%= url %>' disabled />
+			<div>
+				<span class='errhelp'>Url is invalid</span>
+			</div>
+		</div>
+	</div>
+	<div>
+		<label for='enabled'>Enabled</label>
+		<input class='enabled' type='checkbox' checked='<%= enabled %>' />
+	</div>
+	<div>
+		<input type='submit' />
+	</div>
+</form>

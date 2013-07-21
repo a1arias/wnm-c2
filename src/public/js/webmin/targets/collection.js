@@ -6,7 +6,18 @@ define([
 ], function($, _, Backbone, TargetModel){
   var collection = Backbone.Collection.extend({
     url: '/targets',
-    model: TargetModel
+    model: TargetModel,
+    initialize: function(){
+      var self = this;
+      this.fetch({
+        success: function(col, res, opts){
+          self.trigger('data-loaded');
+        },
+        error: function(col, res, opts){
+          debugger;
+        }
+      });
+    }
   });
 
   return collection;
