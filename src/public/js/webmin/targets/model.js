@@ -29,7 +29,7 @@ define([
     },
     defaults: {
       url: '',
-      orgId: '',
+      poll_freq_sec: '',
       enabled: true,
       createDate: '',
       modifiedDate: '',

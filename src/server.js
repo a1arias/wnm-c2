@@ -75,27 +75,63 @@ app.patch('/targets/:id', function(req, res){
     var collection = db.collection('listToPoll');
 
     debugger;
-    collection.update({_id: o_id}, {
-      $set: {enabled: req.body.enabled}
-    }, {}, function(err, modCount){
+
+    var update = req.body;
+
+    collection.findAndModify({
+      _id: o_id
+    }, [['_id', 'asc']], {
+      $set : {
+        enabled: update.enabled,
+        poll_freq_sec: update.poll_freq_sec
+      }
+    }, {
+      // return the updated doc rather than the orig
+      new: true
+    }, function(err, doc){
       db.close();
-      if(err) {
+
+      if(err){
         throw err;
         res.json({success: false, errorMsg: err }, 500);
       } else {
-        util.log('updated ' + modCount + ' records');
-        res.json({success: true}, 200);
+        debugger;
+        util.log('updated target ' + thisId + ' record');
+        res.json({success: true, doc: doc}, 200);
 
+        debugger;
         var com = mod_com.init();
         var msg = {
           type: 'confUpdate',
-          value: {_id: thisId, enabled: req.body.enabled}
+          value: doc
         };
         com.send(msg, function(data){
           debugger;
         });
       };
     });
+
+    // collection.update({_id: o_id}, {
+    //   $set: {enabled: req.body.enabled}
+    // }, {}, function(err, modCount){
+    //   db.close();
+    //   if(err) {
+    //     throw err;
+    //     res.json({success: false, errorMsg: err }, 500);
+    //   } else {
+    //     util.log('updated ' + modCount + ' records');
+    //     res.json({success: true}, 200);
+
+    //     var com = mod_com.init();
+    //     var msg = {
+    //       type: 'confUpdate',
+    //       value: {_id: thisId, enabled: req.body.enabled}
+    //     };
+    //     com.send(msg, function(data){
+    //       debugger;
+    //     });
+    //   };
+    // });
   });
 });
 

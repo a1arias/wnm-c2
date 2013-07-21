@@ -7,8 +7,8 @@ define([
 ], function($, _, Backbone, ErrorView, tpl){
 	var view = Backbone.View.extend({
 		events: {
-			'change .enabled': 'saveTarget',
-			// 'click .enabled': 'saveTarget'
+			// 'change .enabled': 'saveTarget',
+			'click input[type=submit]': 'saveTarget',
 			'focus input': 'removeErrMsg'
 		},
 		initialize: function(){
@@ -24,22 +24,12 @@ define([
 			e.preventDefault();
 
 			var enabledEl = $(this.el).find('.enabled');
-			var enabled = enabledEl.val();
+			var enabled = enabledEl.prop('checked');
 			debugger;
-
-			// the checkbox is already checked
-			if(enabled == 'on'){
-				// unset the attr
-				enabledEl.prop('checked', false);
-				enabled = false;
-			// else the checkbox was unchecked
-			} else {
-				enabledEl.prop('checked', true);
-				enabled = true;
-			};
 
 			var obj = {
 				url: $(this.el).find('.targetUrl').val(),
+				poll_freq_sec: $(this.el).find('.poll_freq_sec').val(),
 				enabled: enabled
 			};
 
