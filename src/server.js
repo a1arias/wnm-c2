@@ -72,7 +72,7 @@ app.patch('/targets/:id', function(req, res){
   mongo.connect('mongodb://127.0.0.1:27017/wbm', function(err, db){
     if(err) throw err;
 
-    var collection = db.collection('list');
+    var collection = db.collection('listToPoll');
 
     debugger;
     collection.update({_id: o_id}, {
