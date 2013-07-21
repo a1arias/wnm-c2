@@ -8,10 +8,10 @@ define([
 	
 	var Router = Backbone.Router.extend({
 		routes: {
-			'': 'showAlerts',
-			'!/home': 'showAlerts',
-			'!/alerts': 'showAlerts',
-			'!/urls(/:id)': 'showUrls',
+			'': 'showTargets',
+			'!/home': 'showTargets',
+			//'!/alerts': 'showAlerts',
+			'!/probes(/:id)': 'showProbes',
 			'!/targets(/:id)': 'showTargets'
 		},
 		initialize: function(){
@@ -40,10 +40,10 @@ define([
 			this.targetsView = new TargetsView();
 			this.elms['content'].html(this.targetsView.render().el);
 		},
-		showUrls: function(id){
+		showProbes: function(id){
 			//var that = this;
 
-			this.headerView.select('urls-menu');
+			this.headerView.select('probes-menu');
 			
 			// if(id){
 			// 	this.urlsView.options.filterById = id;
@@ -52,6 +52,7 @@ define([
 			// }
 			
 			//this.elms['content'].html(this.urlsView.render().el);
+			this.elms['content'].html('');
 		},
 		showAlerts: function(){
 			this.headerView.select('alerts-menu');

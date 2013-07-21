@@ -59,3 +59,7 @@ tooltip {
 .container-fluid {
 	padding: 0 !important;
 }
+
+#targetlist {
+	margin-left: 1em;
+}
