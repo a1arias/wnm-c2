@@ -5,9 +5,12 @@ var EventEmitter = require('events').EventEmitter
   , util = require('util')
   , express = require('express')
   , mod_com = require('./lib/msgmanager')
+  , socketio = require('socket.io')
   ;
 
-var app = module.exports = express();
+var app = express();
+var server = app.listen(3000);
+var io = socketio.listen(server);
 
 app.configure(function(){
   app.set('port', process.env.PORT || 3000);
@@ -24,14 +27,14 @@ app.configure(function(){
 
 app.get('/', function(req, res){
 
-  var com = mod_com.init();
-  var msg = {
-    type: 'test',
-    value: 'gold'
-  };
-  com.send(msg, function(data){
-    debugger;
-  });
+  // var com = mod_com.init();
+  // var msg = {
+  //   type: 'test',
+  //   value: 'gold'
+  // };
+  // com.send(msg, function(data){
+  //   debugger;
+  // });
 
   res.render('index');
   // render the webmin portal
@@ -57,6 +60,27 @@ app.get('/targets', function(req, res){
 app.get('/targets/:id', function(req, res){
   debugger;
   // get one target
+});
+
+app.get('/targets/:id/results', function(req, res){
+  var thisId = req.params.id;
+  // var o_id = new ObjectID(thisId);
+
+  mongo.connect('mongodb://127.0.0.1:27017/wbm', function(err, db){
+    if(err) throw err;
+
+    var collection = db.collection('results');
+
+    collection.find({target_id: thisId}).toArray(function(err, results){
+      if(err) throw err;
+
+      res.json({
+        success: true,
+        // dirty....
+        results: JSON.parse(JSON.stringify(results))
+      }, 200);
+    })
+  });
 });
 
 app.post('/targets', function(req, res){
@@ -139,7 +163,15 @@ app.get('/results', function(req, res){
   debugger;
 });
 
-if(!module.parent){
-  app.listen(process.env.PORT || 3000);
-  util.log('Web server started');
-};
+io.sockets.on('connection', function(socket){
+  debugger;
+  socket.emit('news', {hello: 'world'});
+  socket.on('joined', function(targetId){
+    socket.join(targetId);
+  });
+});
+
+// if(!module.parent){
+//   app.listen(process.env.PORT || 3000);
+//   util.log('Web server started');
+// };

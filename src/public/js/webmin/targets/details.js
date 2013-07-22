@@ -3,16 +3,26 @@ define([
 	'underscore',
 	'backbone',
 	'shared/ErrorView',
+	'targets/ResultChart',
 	'text!./details.html'
-], function($, _, Backbone, ErrorView, tpl){
+], function($, _, Backbone, ErrorView, ResultChart, tpl){
 	var view = Backbone.View.extend({
 		events: {
 			// 'change .enabled': 'saveTarget',
 			'click input[type=submit]': 'saveTarget',
 			'focus input': 'removeErrMsg'
 		},
+		className: 'contentInner',
 		initialize: function(){
+			var that = this;
 			this.template = _.template(tpl);
+			this.resultChart = new ResultChart({
+				targetId: that.options.targetId
+			});
+			this.resultChart.on('ready', function(){
+				debugger;
+				$(that.el).append(that.resultChart.el);
+			});
 		},
 		render: function(){
 			$(this.el).html(this.template(this.model.toJSON()));

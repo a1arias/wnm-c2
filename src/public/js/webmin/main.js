@@ -27,6 +27,9 @@ requirejs.config({
 		highstock: [
 			//'http://code.highcharts.com/stock/highstock.js',
 			'../vendor/highstock'
+		],
+		socketio: [
+			'../../socket.io/socket.io'
 		]
 	},
 	shim: {
@@ -41,13 +44,16 @@ requirejs.config({
 			deps: ['jquery'],
 			exports: 'bootstrap'
 		},
-		'highcharts': {
-			deps: ['jquery'],
-			exports: 'Highcharts'
-		},
+		// 'highcharts': {
+		// 	deps: ['jquery'],
+		// 	exports: 'Highcharts'
+		// },
 		'highstock': {
 			deps: ['jquery'],
 			exports: 'Highstock'
+		},
+		'socketio': {
+			exports: 'io'
 		}
 	},
 	// enforceDefine: true

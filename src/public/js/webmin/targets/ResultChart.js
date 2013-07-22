@@ -2,89 +2,113 @@ define([
 	'jquery',
 	'underscore',
 	'backbone',
-	'highcharts',
+	'highstock',
+	'socketio',
 	'targets/ResultCollection',
 	'text!./ResultChart.html'
-], function($, _, Backbone, Highcharts, ResultCollection, tpl){
+], function($, _, Backbone, Highstock, io, ResultCollection, tpl){
 	var view = Backbone.View.extend({
+		// className: 'contentInner',
+		url: function(){
+			return '/targets/'+this.options.targetId+'/results';
+		},
 		initialize: function(){
+			var that = this;
+			var socket = io.connect('http://dev.cbm.plx:3000');
+			
+			socket.on('news', function(data){
+				console.log(data);
+				socket.emit('joined', that.options.targetId);
+			});
+
 			this.template = _.template(tpl);
-			this.colleciton = new ResultCollection();
+			
 			Highcharts.setOptions({
 				global : {
 					useUTC : false
 				}
 			});
+
+			this.seriesOptions = [],
+			// this.yAxisOptions = [],
+			// this.seriesCounter = 0,
+			// this.names = ['MSFT', 'AAPL', 'GOOG'],
+			this.colors = Highcharts.getOptions().colors;
+
+			this.render();
 		},
 		render: function(){
-			var that = this;
+			var that = this
+				, url = this.url()
+				;
+
+			var tt = {
+				name: 'total_time',
+				data: []
+			};
+
+			var ttnl = {
+				name: 'name_lookup_time',
+				data: []
+			};
+
+			var ttc = {
+				name: 'connect_time',
+				data: []
+			};
+
+			var ttst = {
+				name: 'starttransfer_time',
+				data: []
+			};
 
 			$(this.el).html(this.template());
 
-			var seriesOptions = [],
-				yAxisOptions = [],
-				seriesCounter = 0,
-				names = ['MSFT', 'AAPL', 'GOOG'],
-				colors = Highcharts.getOptions().colors;
+			$.getJSON(url)
+			.done(function(data){
+				if(data.success && data.results.length > 0){
+					_.each(data.results, function(el, index, list){
+						var ltt = [el.time_probe_completed, el.total_time];
+						var lttnl = [el.time_probe_completed, el.namelookup_time];
+						var lttc = [el.time_probe_completed, el.connect_time];
+						var lttst = [el.time_probe_completed, el.starttransfer_time];
+						tt.data.push(ltt);
+						ttnl.data.push(lttnl);
+						ttc.data.push(lttc);
+						ttst.data.push(lttst);
+					}, that);
 
-			$.each(names, function(i, name) {
+					that.seriesOptions.push(tt);
+					that.seriesOptions.push(ttnl);
+					that.seriesOptions.push(ttc);
+					that.seriesOptions.push(ttst);
 
-				$.getJSON('http://www.highcharts.com/samples/data/jsonp.php?filename='+ name.toLowerCase() +'-c.json&callback=?',	function(data) {
-
-					seriesOptions[i] = {
-						name: name,
-						data: data
-					};
-
-					// As we're loading the data asynchronously, we don't know what order it will arrive. So
-					// we keep a counter and create the chart when all the data is loaded.
-					seriesCounter++;
-
-					if (seriesCounter == names.length) {
-						that.createChart();
-					}
-				});
-			});
+					that.createChart();
+				} else {
+					// error fetching data
+				};
+			})
+			.fail(function(jqxhr, textStatus, error){
+				debugger;
+			})
+			;
 
 			return this;
 		},
 		createChart: function(){
 			var that = this;
 
-			$(this.el).find('#hschart').highcharts({
-				chart: {
-		    },
+			// var cwidth = this.getWidth();
 
-		    rangeSelector: {
-		        selected: 4
-		    },
-
-		    yAxis: {
-		    	labels: {
-		    		formatter: function() {
-		    			return (this.value > 0 ? '+' : '') + this.value + '%';
-		    		}
-		    	},
-		    	plotLines: [{
-		    		value: 0,
-		    		width: 2,
-		    		color: 'silver'
-		    	}]
-		    },
-		    
-		    plotOptions: {
-		    	series: {
-		    		compare: 'percent'
-		    	}
-		    },
-		    
-		    tooltip: {
-		    	pointFormat: '<span style="color:{series.color}">{series.name}</span>: <b>{point.y}</b> ({point.change}%)<br/>',
-		    	valueDecimals: 2
-		    },
-		    
+			var chartOpts = {
 		    series: that.seriesOptions
-			});
+			};
+
+			$(this.el).find('#hschart').highcharts('StockChart', chartOpts);
+			this.trigger('ready');
+		},
+		getWidth: function(){
+			return $(this.el).width() - 20;
 		}
 	});
 

@@ -65,7 +65,8 @@ define([
 						;
 
 					that.view = new TargetView({
-						model: target
+						model: target,
+						targetId: id
 					});
 
 					// listen for target validation failure
