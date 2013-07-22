@@ -19,6 +19,10 @@ requirejs.config({
 		text: [
 			'https://raw.github.com/requirejs/text/master/text',
 			'../vendor/text'
+		],
+		highstock: [
+			//'http://code.highcharts.com/stock/highstock.js',
+			'../vendor/highstock'
 		]
 	},
 	shim: {
@@ -32,9 +36,13 @@ requirejs.config({
 		'bootstrap': {
 			deps: ['jquery'],
 			exports: 'bootstrap'
+		},
+		'highstock': {
+			deps: ['jquery'],
+			exports: 'highstock'
 		}
 	},
-	enforceDefine: true
+	// enforceDefine: true
 });
 
 define([
