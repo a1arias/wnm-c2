@@ -5,9 +5,11 @@ define([
 	'shared/HeaderView',
 	'targets/collection',
 	'targets/main',
-	'targets/details'
+	'targets/details',
+	'targets/ResultChart'
 ], function($, _, Backbone, HeaderView, 
-	TargetsCollection, TargetsView, TargetView){
+	TargetsCollection, TargetsView, TargetView,
+	TargetResultView){
 	
 	var Router = Backbone.Router.extend({
 		routes: {
@@ -15,7 +17,8 @@ define([
 			'!/home': 'showTargets',
 			//'!/alerts': 'showAlerts',
 			'!/probes(/:id)': 'showProbes',
-			'!/targets(/:id)': 'showTargets'
+			'!/targets(/:id)': 'showTargets',
+			'!/poo': 'showResultChart'
 		},
 		initialize: function(){
 			var that = this;
@@ -38,6 +41,10 @@ define([
 
 			$('#header').html(this.headerView.render().el);
 			this.headerView.select('alerts-menu');
+		},
+		showResultChart: function(){
+			this.trcView = new TargetResultView();
+			this.elms['content'].html(this.trcView.render().el);
 		},
 		showTargets: function(id){
 			var that = this;
