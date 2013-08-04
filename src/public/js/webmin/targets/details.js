@@ -16,11 +16,13 @@ define([
 		initialize: function(){
 			var that = this;
 			this.template = _.template(tpl);
+			
 			this.resultChart = new ResultChart({
-				targetId: that.options.targetId
+				targetId: that.options.targetId,
+				width: $(that.el).width()
 			});
+			
 			this.resultChart.on('ready', function(){
-				debugger;
 				$(that.el).append(that.resultChart.el);
 			});
 		},

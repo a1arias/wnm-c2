@@ -4,13 +4,22 @@ var EventEmitter = require('events').EventEmitter
   , ObjectID = require('mongodb').ObjectID
   , util = require('util')
   , express = require('express')
+  , http = require('http')
   , mod_com = require('./lib/msgmanager')
   , socketio = require('socket.io')
+  , redis = require('redis')
+  , rc = redis.createClient()
   ;
 
 var app = express();
-var server = app.listen(3000);
+var server = http.createServer(app);
 var io = socketio.listen(server);
+
+server.listen(3000);
+
+io.configure('development', function(){
+  io.set('log level', 5);
+});
 
 app.configure(function(){
   app.set('port', process.env.PORT || 3000);
@@ -165,16 +174,26 @@ app.get('/results', function(req, res){
 
 io.sockets.on('connection', function(socket){
   debugger;
-  // send some kind of meta data here 
   socket.emit('sync', {});
   // join the channel of the specified targetIs
-  socket.on('join', function(targetId){
+  socket.on('join:results', function(targetId){
     debugger;
-    socket.join(targetId);
+    socket.join('/results/'+targetId);
   });
 });
 
-// if(!module.parent){
-//   app.listen(process.env.PORT || 3000);
-//   util.log('Web server started');
-// };
+rc.on('connect', function(){
+  // subscribe to the results channel
+  rc.subscribe('results');
+});
+
+rc.on('message', function(channel, msg){
+  // util.log('Channel: ' + channel + ' msg: ' + msg);
+  var msg = JSON.parse(msg);
+  var tid = msg.target_id;
+  debugger;
+  io.sockets.in('/results/'+tid).emit('message', {
+    channel: channel,
+    msg: msg
+  });
+});
