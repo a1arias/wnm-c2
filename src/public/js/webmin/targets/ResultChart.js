@@ -1,116 +1,136 @@
 define([
-	'jquery',
-	'underscore',
-	'backbone',
-	'highstock',
-	'socketio',
-	'targets/ResultCollection',
-	'text!./ResultChart.html'
+  'jquery',
+  'underscore',
+  'backbone',
+  'highstock',
+  'socketio',
+  'targets/ResultCollection',
+  'text!./ResultChart.html'
 ], function($, _, Backbone, Highstock, io, ResultCollection, tpl){
-	var view = Backbone.View.extend({
-		// className: 'contentInner',
-		url: function(){
-			return '/targets/'+this.options.targetId+'/results';
-		},
-		initialize: function(){
-			var that = this;
-			var socket = io.connect('http://dev.cbm.plx:3000');
-			
-			socket.on('news', function(data){
-				console.log(data);
-				socket.emit('joined', that.options.targetId);
-			});
+  var view = Backbone.View.extend({
+    // className: 'contentInner',
+    url: function(){
+      return '/targets/'+this.options.targetId+'/results';
+    },
+    initialize: function(){
+      var that = this;
+      var socket = io.connect('http://dev.cbm.plx:3000');
+      // debugger;
+      socket.on('news', function(data){
+        console.log(data);
+        // join the target channel
+        socket.emit('join', that.options.targetId);
+      });
 
-			this.template = _.template(tpl);
-			
-			Highcharts.setOptions({
-				global : {
-					useUTC : false
-				}
-			});
+      this.template = _.template(tpl);
+      
+      Highcharts.setOptions({
+        global : {
+          useUTC : false
+        }
+      });
 
-			this.seriesOptions = [],
-			// this.yAxisOptions = [],
-			// this.seriesCounter = 0,
-			// this.names = ['MSFT', 'AAPL', 'GOOG'],
-			this.colors = Highcharts.getOptions().colors;
+      this.seriesOptions = [],
+      // this.yAxisOptions = [],
+      // this.seriesCounter = 0,
+      // this.names = ['MSFT', 'AAPL', 'GOOG'],
+      this.colors = Highcharts.getOptions().colors;
 
-			this.render();
-		},
-		render: function(){
-			var that = this
-				, url = this.url()
-				;
+      this.render();
+    },
+    render: function(){
+      var that = this
+        , url = this.url()
+        ;
 
-			var tt = {
-				name: 'total_time',
-				data: []
-			};
+      var tt = {
+        name: 'total_time',
+        data: []
+      };
 
-			var ttnl = {
-				name: 'name_lookup_time',
-				data: []
-			};
+      var ttnl = {
+        name: 'name_lookup_time',
+        data: []
+      };
 
-			var ttc = {
-				name: 'connect_time',
-				data: []
-			};
+      var ttc = {
+        name: 'connect_time',
+        data: []
+      };
 
-			var ttst = {
-				name: 'starttransfer_time',
-				data: []
-			};
+      var ttst = {
+        name: 'starttransfer_time',
+        data: []
+      };
 
-			$(this.el).html(this.template());
+      var errors = {
+        type: 'flags',
+        name: 'errors',
+        shape: 'circlepin',
+        data: []
+      };
 
-			$.getJSON(url)
-			.done(function(data){
-				if(data.success && data.results.length > 0){
-					_.each(data.results, function(el, index, list){
-						var ltt = [el.time_probe_completed, el.total_time];
-						var lttnl = [el.time_probe_completed, el.namelookup_time];
-						var lttc = [el.time_probe_completed, el.connect_time];
-						var lttst = [el.time_probe_completed, el.starttransfer_time];
-						tt.data.push(ltt);
-						ttnl.data.push(lttnl);
-						ttc.data.push(lttc);
-						ttst.data.push(lttst);
-					}, that);
+      $(this.el).html(this.template());
 
-					that.seriesOptions.push(tt);
-					that.seriesOptions.push(ttnl);
-					that.seriesOptions.push(ttc);
-					that.seriesOptions.push(ttst);
+      $.getJSON(url)
+      .done(function(data){
+        if(data.success && data.results.length > 0){
+          _.each(data.results, function(el, index, list){
+            if(el.error_message){
+              var lerr = {
+                x : el.time_probe_completed,
+                title : 'E',
+                text : el.error_message
+              };
+              errors.data.push(lerr);
+            } else {
+              var ltt = [el.time_probe_completed, el.total_time];
+              var lttnl = [el.time_probe_completed, el.namelookup_time];
+              var lttc = [el.time_probe_completed, el.connect_time];
+              var lttst = [el.time_probe_completed, el.starttransfer_time];
+              
+              tt.data.push(ltt);
+              ttnl.data.push(lttnl);
+              ttc.data.push(lttc);
+              ttst.data.push(lttst);
+            };
+          }, that);
 
-					that.createChart();
-				} else {
-					// error fetching data
-				};
-			})
-			.fail(function(jqxhr, textStatus, error){
-				debugger;
-			})
-			;
+          that.seriesOptions.push(tt);
+          that.seriesOptions.push(ttnl);
+          that.seriesOptions.push(ttc);
+          that.seriesOptions.push(ttst);
+          that.seriesOptions.push(errors);
 
-			return this;
-		},
-		createChart: function(){
-			var that = this;
+          that.createChart();
+        } else {
+          // error fetching data
+        };
+      })
+      .fail(function(jqxhr, textStatus, error){
+        debugger;
+      })
+      ;
 
-			// var cwidth = this.getWidth();
+      return this;
+    },
+    createChart: function(){
+      var that = this;
 
-			var chartOpts = {
-		    series: that.seriesOptions
-			};
+      // var cwidth = this.getWidth();
 
-			$(this.el).find('#hschart').highcharts('StockChart', chartOpts);
-			this.trigger('ready');
-		},
-		getWidth: function(){
-			return $(this.el).width() - 20;
-		}
-	});
+      var chartOpts = {
+        series: that.seriesOptions
+      };
+      debugger;
+      $(this.el).find('#hschart').highcharts('StockChart', chartOpts);
+      this.trigger('ready');
+    },
+    getWidth: function(){
+      debugger;
+      return $(this.el).width() - 20;
+    }
+  });
 
-	return view;
+  return view;
 });

@@ -5,7 +5,7 @@ requirejs.config({
 			'../vendor/bootstrap'
 		],
 		jquery: [
-			'https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min',
+			'https://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min',
 			'../vendor/jquery'
 		],
 		backbone: [

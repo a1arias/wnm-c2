@@ -165,8 +165,11 @@ app.get('/results', function(req, res){
 
 io.sockets.on('connection', function(socket){
   debugger;
-  socket.emit('news', {hello: 'world'});
-  socket.on('joined', function(targetId){
+  // send some kind of meta data here 
+  socket.emit('sync', {});
+  // join the channel of the specified targetIs
+  socket.on('join', function(targetId){
+    debugger;
     socket.join(targetId);
   });
 });
