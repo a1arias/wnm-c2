@@ -5,7 +5,7 @@ requirejs.config({
 			'../vendor/bootstrap'
 		],
 		jquery: [
-			'https://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min',
+			// 'https://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min',
 			'../vendor/jquery'
 		],
 		backbone: [
@@ -17,7 +17,7 @@ requirejs.config({
 			'../vendor/underscore'
 		],
 		text: [
-			'https://raw.github.com/requirejs/text/master/text',
+			// 'https://raw.github.com/requirejs/text/master/text',
 			'../vendor/text'
 		],
 		highcharts: [

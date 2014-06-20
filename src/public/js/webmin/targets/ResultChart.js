@@ -42,7 +42,7 @@ define([
         data: []
       };
 
-      var socket = io.connect('http://localhost:3000');
+      var socket = io.connect('http://archy-lt.adr.ari');
       // when sync is triggered the data
       // object can be used to re-build graph
       socket.on('sync', function(data){
@@ -62,7 +62,10 @@ define([
             title : 'E',
             text : el.error_message
           };
-          this.errors.addPoint(lerr, true, true);
+          var error_series = _.findWhere(that.chart.series, {
+            name: 'errors'
+          });
+          error_series.addPoint(lerr, true, true);
         } else {
           var ltt = [el.time_probe_completed, el.total_time];
           var lttnl = [el.time_probe_completed, el.namelookup_time];
@@ -70,7 +73,7 @@ define([
           var lttst = [el.time_probe_completed, el.starttransfer_time];
           
           var allseries = that.chart.series;
-          
+
           var tt_series = _.findWhere(allseries, {
             name: 'total_time'
           });
